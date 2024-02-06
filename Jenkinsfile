@@ -52,6 +52,17 @@ pipeline {
        }
      }
 
+      stage('Docker Build and Push') {
+  	steps {
+    	withCredentials([string(credentialsId: 'docker_hub_fr', variable: 'DOCKER_HUB_PASSWORD')]) {
+      	sh 'sudo docker login -u flavinou7 -p $DOCKER_HUB_PASSWORD'
+      	sh 'printenv'
+      	sh 'sudo docker build -t flavinou7/devops-app:""$GIT_COMMIT"" .'
+      	sh 'sudo docker push flavinou7/devops-app:""$GIT_COMMIT""'
+    	}
+
+  	}
+	}
 
 
 

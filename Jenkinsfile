@@ -2,13 +2,18 @@ pipeline {
   agent any
 
   stages {
-      stage('Build Artifact') {
+     
+
+
+    stage('Build Artifact') {
             steps {
               sh "mvn clean package -DskipTests=true"
               archive 'target/*.jar' //so that they  be d
             }
         }
-        stage('UNIT test & jacoco ') {
+
+
+    stage('UNIT test & jacoco ') {
       steps {
         sh "mvn test"
       }
@@ -20,6 +25,8 @@ pipeline {
       }
  
     } 
+
+
       stage('Mutation Tests - PIT') {
   	        steps {
     	          sh "mvn org.pitest:pitest-maven:mutationCoverage"
@@ -31,7 +38,10 @@ pipeline {
     	}
 	    }
 
-    {
+
+
+
+  
     stage('Vulnerability Scan - Docker Trivy') {
        steps {
 //--------------------------replace variable  token_github on file trivy-image-scan.sh
@@ -41,6 +51,13 @@ pipeline {
         }
        }
      }
+
+
+
+
+
+
+
 
 
     }

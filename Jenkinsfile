@@ -1,6 +1,16 @@
 pipeline {
   agent any
 
+  environment {
+ deploymentName = "devsecops"
+ containerName = "devsecops-container"
+ serviceName = "devsecops-svc"
+ imageName = "hrefnhaila/devops-app:${GIT_COMMIT}"
+ applicationURL="http://mytpm.eastus.cloudapp.azure.com"
+ applicationURI="/increment/99"
+}
+
+
   stages {
      
 

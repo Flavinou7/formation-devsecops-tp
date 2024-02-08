@@ -107,37 +107,42 @@ catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
 
   	}
 	}
-
-
+  
+  
+        stage('Vulnerability Scan - Kubernetes') {
+           steps {
+             parallel(
+               "OPA Scan": {
+                 sh 'sudo docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-k8s-security.rego k8s_deployment_service.yaml'
+               },
+               "Kubesec Scan": {
+                 sh "sudo bash kubesec-scan.sh"
+               },
+               "Trivy Scan": {
+                 sh "sudo bash trivy-k8s-scan.sh"
+               }
+             )
+           }
+         }
+ 
       stage('Deployment Kubernetes  ') {
-  	steps {
-    	withKubeConfig([credentialsId: 'kubeconfig']) {
-           	sh "sed -i 's#replace#flavinou7/devops-app:${GIT_COMMIT}#g' k8s_deployment_service.yaml"
-           	sh "kubectl apply -f k8s_deployment_service.yaml"
-         	}
-  	  }
-
-	  }
-
-
-    stage('Vulnerability Scan - Kubernetes') {
-   	steps {
-     	parallel(
-       	"OPA Scan": {
-         	sh 'sudo docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-k8s-security.rego k8s_deployment_service.yaml'
-       	},
-       	"Kubesec Scan": {
-         	sh "sudo bash kubesec-scan.sh"
-       	},
-       	"Trivy Scan": {
-         	sh "sudo bash trivy-k8s-scan.sh"
-       	}
-     	)
-   	}
- 	}
-
-
-
+         steps {
+             withKubeConfig([credentialsId: 'kubeconfig']) {
+              sh "sed -i 's#replace#flavinou7/devops-app:${GIT_COMMIT}#g' k8s_deployment_service.yaml"
+               sh "kubectl apply -f k8s_deployment_service.yaml"
+          }
+       }
+ 
+     }
+ 
+ 
+      stage('OWASP ZAP - DAST') {
+       steps {
+         withKubeConfig([credentialsId: 'kubeconfig']) {
+           sh 'sudo bash zap.sh'
+         }
+       }
+     }
 
     }
 }

@@ -74,12 +74,11 @@ pipeline {
         steps {
 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
  
-          withSonarQubeEnv('SonarQube') {
-              sh "mvn clean verify sonar:sonar \
-				-Dsonar.projectKey=jenkis-token-flavinou \
-				-Dsonar.projectName='jenkis-token-flavinou' \
-				-Dsonar.host.url=http://mytpm.eastus.cloudapp.azure.com:9112 \
-				-Dsonar.token=sqp_8d8502e9eda471d944de7473c1986057b81a9f30"
+          withSonarQubeEnv('SonarQubeConfig') {
+              sh "mvn sonar:sonar \
+            -Dsonar.projectKey=sonarqube_flavinou \
+            -Dsonar.projectName=sonarqube_flavinou \
+            -Dsonar.host.url=http://mytpm.eastus.cloudapp.azure.com:9999"
               }
             }
         }

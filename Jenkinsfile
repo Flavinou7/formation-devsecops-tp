@@ -2,10 +2,10 @@ pipeline {
   agent any
 
   environment {
- deploymentName = "devsecops"
- containerName = "devsecops-container"
- serviceName = "devsecops-svc"
- imageName = "hrefnhaila/devops-app:${GIT_COMMIT}"
+ deploymentName = "devsecops-flavinou"
+ containerName = "devsecops-flavinou-container"
+ serviceName = "devsecops-flavinou-svc"
+ imageName = "flavinou7/devops-app:${GIT_COMMIT}"
  applicationURL="http://mytpm.eastus.cloudapp.azure.com"
  applicationURI="/increment/99"
 }

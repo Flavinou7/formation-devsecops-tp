@@ -54,6 +54,39 @@ pipeline {
        }
      }
 
+
+
+    stage('Vulnerability Scan - Docker') {
+        steps {
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+              sh "mvn dependency-check:check"
+         }
+      }
+          post {
+            always {
+              dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
+         }
+     }
+ }
+
+
+    stage('SonarQube Analysis - SAST') {
+        steps {
+catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+ 
+          withSonarQubeEnv('SonarQube') {
+              sh "mvn clean verify sonar:sonar \
+				-Dsonar.projectKey=jenkis-token-flavinou \
+				-Dsonar.projectName='jenkis-token-flavinou' \
+				-Dsonar.host.url=http://mytpm.eastus.cloudapp.azure.com:9112 \
+				-Dsonar.token=sqp_8d8502e9eda471d944de7473c1986057b81a9f30"
+              }
+            }
+        }
+    }
+
+
+
       stage('Docker Build and Push') {
   	steps {
     	withCredentials([string(credentialsId: 'docker_hub_password_fr', variable: 'DOCKER_HUB_PASSWORD')]) {
@@ -66,6 +99,7 @@ pipeline {
   	}
 	}
 
+
       stage('Deployment Kubernetes  ') {
   	steps {
     	withKubeConfig([credentialsId: 'kubeconfig']) {
@@ -77,6 +111,21 @@ pipeline {
 	  }
 
 
+    stage('Vulnerability Scan - Kubernetes') {
+   	steps {
+     	parallel(
+       	"OPA Scan": {
+         	sh 'sudo docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-k8s-security.rego k8s_deployment_service.yaml'
+       	},
+       	"Kubesec Scan": {
+         	sh "sudo bash kubesec-scan.sh"
+       	},
+       	"Trivy Scan": {
+         	sh "sudo bash trivy-k8s-scan.sh"
+       	}
+     	)
+   	}
+ 	}
 
 
 
